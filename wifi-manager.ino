@@ -1,16 +1,18 @@
-#include <ESP8266WiFi.h>
+/*
+  ESP8266mod Wifi module
+  Board : NodeMCU 1.0 (ESP 12-E Module)
 
-// seçenek değişkenleri
-#define WIFI_CONNECT 1
-#define WIFI_SCAN 2
-#define ACTIVATE_FRONTEND 3
-#define DISABLE_FRONTEND 4
-#define HOTSPOT_MODE 5
-#define NO_COMMUNICATE 6
+  author : InServeOfGod
+  languages : cpp
+  encoding : utf-8
+*/
+
+#include "kernel.h"
 
 void setup() {
   // ayarlar : serial protunu 115200'e bağladık ve RST ledini yazılabilir moda getirdik
   Serial.begin(115200);
+  Serial.setDebugOutput(false);
 
   while (!Serial) {
     delay(1);
@@ -19,34 +21,52 @@ void setup() {
   Serial.println();
   Serial.println();
   pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+
+  //  seçenekleri listele
+  getChoices();
 }
 
 void loop() {
-  //  seçenekleri listele
-  Serial.println("1 = WİFİ BAĞLAN");
-  Serial.println("2 = WİFİ TARA");
-  Serial.println("3 = ARAYÜZÜ ETKİNLEŞTİR");
-  Serial.println("4 = ARAYÜZÜ KAPAT");
-  Serial.println("5 = WİFİ PAYLAŞ");
-  Serial.println("6 = TÜM BAĞLANTILARI KES");
-
-  // seçenek gönderilinceye kadar bekle
-  while (!Serial.available()) {
-    delay(1);
-  }
-
   // seçenek gönderildiğinde işlem yap
-  int choose = Serial.parseInt();
+  Serial.println("seçim : ");
+  long choose = getNumberInput();
 
+  // eğer girilen veri geçerli ise
   if (choose) {
-    // test
-    Serial.print("you selected : ");
-    Serial.println(choose);
-    // test end
-
     switch (choose) {
       case WIFI_CONNECT:
-        Serial.println("Wifi Bağlantı modu aktif.");
+        // cihazı wifi bağlantı moduna geçir
+        if (WiFi.mode(WIFI_STA)) {
+          Serial.println("Wifi bağlantı modu aktif.");
+
+          // daha önceden bağlantı kurulmuşsa bağlantıyı kapat
+          wifiShutdown();
+
+          // wifi ağına bağlanmaya çalış
+          if (wifiConnect()) {
+            wifiStatus();
+          } else {
+            Serial.println("Bu ağa bağlanılamıyor.");
+          }
+        } else {
+          Serial.println("Wifi bağlantı moduna geçerken bir hata oluştu!");
+        }
+
+        break;
+
+      case WIFI_DISCONNECT:
+        wifiShutdown();
+        digitalWrite(LED_BUILTIN, LOW);
+        break;
+
+      case WIFI_INFO:
+        Serial.println("Wifi bilgileri paylaşılıyor...");
+        wifiSettings();
+        break;
+
+      case WIFI_SCAN:
+        Serial.println("wifi cihazları taranıyor...");
         break;
 
       case ACTIVATE_FRONTEND:
@@ -54,30 +74,15 @@ void loop() {
         break;
 
       case DISABLE_FRONTEND:
-        Serial.println("Arayüz modu etkisizleştirildi.");
+        Serial.println("Arayüz modu kapatıldı.");
         break;
 
-      case HOTSPOT_MODE:
-        Serial.println("Wifi paylaşma modu aktif.");
-        break;
-
-      case NO_COMMUNICATE:
-        Serial.println("Tüm bağlanıtlar kesildi başa dölüyüyor.");
+      case AP_MODE:
+        Serial.println("Wifi ulaşım noktası aktif.");
         break;
 
       default:
         Serial.println("Geçersiz seçenek!");
     }
   }
-
-
-
-
-
-
-
-
-
-
-
 }
