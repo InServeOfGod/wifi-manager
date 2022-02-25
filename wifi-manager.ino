@@ -9,6 +9,8 @@
 
 #include "kernel.h"
 
+#define MOD_EXCEPTION "Wifi bağlantı moduna geçilirken bir hata oluştu."
+
 void setup() {
   // ayarlar : serial protunu 115200'e bağladık ve RST ledini yazılabilir moda getirdik
   Serial.begin(115200);
@@ -49,7 +51,7 @@ void loop() {
             Serial.println("Bu ağa bağlanılamıyor.");
           }
         } else {
-          Serial.println("Wifi bağlantı moduna geçerken bir hata oluştu!");
+          Serial.println(MOD_EXCEPTION);
         }
 
         break;
@@ -64,22 +66,60 @@ void loop() {
         break;
 
       case WIFI_SCAN:
-        Serial.println("wifi cihazları taranıyor...");
+        Serial.print("wifi cihazları taranıyor");
+        // cihazı wifi bağlantı moduna geçir
+        if (WiFi.mode(WIFI_STA)) {
+          WiFi.disconnect();
+          delay(100);
+          WiFi.scanNetworks(true, true);
+          wifiScanner();
+        } else {
+          Serial.println(MOD_EXCEPTION);
+        }
+
         break;
 
       case ACTIVATE_FRONTEND:
-        Serial.println("Arayüz modu aktif.");
+        // TEST SECTION DELETE THIS LATER
+        WiFi.begin("Kat4_1", "LHH13251");
+
+        while (WiFi.status() != WL_CONNECTED) {
+          Serial.print(".");
+          delay(500);
+        }
+
+        // TEST SECTION
+
+        if (WiFi.status() == WL_CONNECTED) {
+          server.begin();
+
+          Serial.println("Arayüz modu aktif.");
+          Serial.println("Lütfen sistemi arayüz üzerinden yönetin.");
+          Serial.print("Arayüz IP : ");
+          Serial.println(WiFi.localIP());
+          handleClients();
+        }
+
+        else {
+          Serial.println("Arayüz modu aktifleştirilemedi! Bir wifi ağına bağlanmayı deneyin.");
+        }
+
         break;
 
       case DISABLE_FRONTEND:
+        server.stop();
         Serial.println("Arayüz modu kapatıldı.");
         break;
 
       case AP_MODE:
         Serial.println("Ulaşım noktası aktifleştiriliyor...");
 
-        if (apStart()) {
-          Serial.println("Ulaşım noktası aktifleştirildi.");
+        if (WiFi.mode(WIFI_AP)) {
+          if (apStart()) {
+            Serial.println("Ulaşım noktası aktifleştirildi.");
+          }
+        } else {
+          Serial.println("Wifi ulaşım noktası moduna geçilirken bir hata oluştu.");
         }
 
         break;

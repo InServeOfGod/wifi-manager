@@ -129,3 +129,51 @@ void wifiStatus(void) {
     delay(250);
   }
 }
+
+void wifiScanner(void) {
+  if (WiFi.scanComplete() != WIFI_NOT_SCANNING) {
+    while (WiFi.scanComplete() == WIFI_SCANNING) {
+      delay(250);
+      Serial.print(".");
+    }
+
+    Serial.print("\n\n");
+
+    int apCount = WiFi.scanComplete();
+
+    for (int i = 0 ; i < apCount; i++) {
+      int security = WiFi.encryptionType(i);
+      String security_str;
+
+      switch (security) {
+        case ENC_TYPE_WEP:
+          security_str = "WEP";
+          break;
+
+        case ENC_TYPE_TKIP:
+          security_str = "WPA";
+          break;
+
+        case ENC_TYPE_CCMP:
+          security_str = "WPA2";
+          break;
+
+        case ENC_TYPE_NONE:
+          security_str = "YOK";
+          break;
+
+        case ENC_TYPE_AUTO:
+          security_str = "WPA/WPA2";
+          break;
+
+        default:
+          security_str = "BİLİNMİYOR";
+      }
+
+      Serial.printf("%d SSID=%s BSSID=%s CH=%d dBm=%d GÜVENLİK=%s GİZLİ=%s\n\n",
+                    i, WiFi.SSID(i).c_str(), WiFi.BSSIDstr(i).c_str(), WiFi.channel(i), WiFi.RSSI(i), security_str,
+                    WiFi.isHidden(i) ? "EVET" : "HAYIR");
+      delay(100);
+    }
+  }
+}

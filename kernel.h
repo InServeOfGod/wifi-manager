@@ -2,6 +2,7 @@
 #include "input.h"
 #include "station.h"
 #include "ap.h"
+#include "gateway.h"
 
 // seçenek değişkenleri
 #define WIFI_CONNECT 1
@@ -13,3 +14,10 @@
 #define AP_MODE 7
 #define AP_MODE_DISABLE 8
 #define AP_INFO 9
+
+// wifi tarama değişkenleri
+#define WIFI_SCANNING -1
+#define WIFI_NOT_SCANNING -2
+
+// server değikeni
+WiFiServer server(80);
