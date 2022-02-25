@@ -1,6 +1,7 @@
 #include <ESP8266WiFi.h>
 #include "input.h"
 #include "station.h"
+#include "ap.h"
 
 // seçenek değişkenleri
 #define WIFI_CONNECT 1

@@ -21,7 +21,6 @@ void setup() {
   Serial.println();
   Serial.println();
   pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
 
   //  seçenekleri listele
   getChoices();
@@ -38,7 +37,7 @@ void loop() {
       case WIFI_CONNECT:
         // cihazı wifi bağlantı moduna geçir
         if (WiFi.mode(WIFI_STA)) {
-          Serial.println("Wifi bağlantı modu aktif.");
+          Serial.println("Wifi bağlantı modu aktifleştiriliyor...");
 
           // daha önceden bağlantı kurulmuşsa bağlantıyı kapat
           wifiShutdown();
@@ -57,7 +56,6 @@ void loop() {
 
       case WIFI_DISCONNECT:
         wifiShutdown();
-        digitalWrite(LED_BUILTIN, LOW);
         break;
 
       case WIFI_INFO:
@@ -78,8 +76,23 @@ void loop() {
         break;
 
       case AP_MODE:
-        Serial.println("Wifi ulaşım noktası aktif.");
+        Serial.println("Ulaşım noktası aktifleştiriliyor...");
+
+        if (apStart()) {
+          Serial.println("Ulaşım noktası aktifleştirildi.");
+        }
+
         break;
+
+      case AP_MODE_DISABLE:
+        apShutdown();
+        break;
+
+      case AP_INFO:
+        Serial.println("Ulaşım noktası bilgileri paylaşılıyor...");
+        apSettings();
+        break;
+
 
       default:
         Serial.println("Geçersiz seçenek!");
